@@ -26,7 +26,7 @@ public class ContinentalMain {
 		InputStream is = null;
 		try {
 			byte[] readAllBytes = Files
-					.readAllBytes(FileSystems.getDefault().getPath("/Users/ldaher/Desktop/Continental/nfes/NFE.xml"));
+					.readAllBytes(FileSystems.getDefault().getPath("/Users/ldaher/Desktop/Continental/nfes/nfes.zip"));
 
 			ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(readAllBytes));
 
