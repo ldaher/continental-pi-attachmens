@@ -239,7 +239,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	}
 
 	private void retrieveElementFromNFeContent(String content) {
-		Pattern pattern = Pattern.compile("(nfeProc|cteProc|procEventoNFe|procEventoCTe)");
+		Pattern pattern = Pattern.compile("(nfeProc|procEventoNFe|cteProc|procEventoCTe)");
 
 		Matcher m = pattern.matcher(content);
 
@@ -261,10 +261,10 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 			case "nfeProc":
 				attachmentTag1.appendChild(textTag);
 				break;
-			case "cteProc":
+			case "procEventoNFe":
 				attachmentTag2.appendChild(textTag);
 				break;
-			case "procEventoNFe":
+			case "cteProc":
 				attachmentTag3.appendChild(textTag);
 				break;
 			case "procEventoCTe":
