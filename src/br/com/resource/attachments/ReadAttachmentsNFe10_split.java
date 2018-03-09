@@ -182,7 +182,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 					
 					String entryName = zipEntry.getName();
 
-					if (entryName.matches(".*\\.xml")) {
+					if (entryName.matches("(?i:.*\\.xml)")) {
 						ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 						byte[] byteBuf = new byte[4096];
