@@ -42,7 +42,6 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	private final String TAG_Message2 = "ns0:Message2";
 	private final String TAG_Message3 = "ns0:Message3";
 	private final String TAG_Message4 = "ns0:Message4";
-	private final String TAG_Message5 = "ns0:Message5";
 
 	private final String NS_XI_MESSAGE = "http://sap.com/xi/XI/SplitAndMerge";
 	private final String ATTR_XI_MESSAGE = "xmlns:ns0";
@@ -54,7 +53,6 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	private Element attachmentTag2;
 	private Element attachmentTag3;
 	private Element attachmentTag4;
-	private Element attachmentTag5;
 
 	@Override
 	public void transform(TransformationInput tIn, TransformationOutput tOut) throws StreamTransformationException {
@@ -82,7 +80,6 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 			attachmentTag2 = this.xmlDoc.createElement(TAG_Message2);
 			attachmentTag3 = this.xmlDoc.createElement(TAG_Message3);
 			attachmentTag4 = this.xmlDoc.createElement(TAG_Message4);
-			attachmentTag5 = this.xmlDoc.createElement(TAG_Message5);
 
 			getHelper().getTrace().addInfo("starting NFe fetch process");
 			if (isMessageTagContentValid(tIn)) {
@@ -144,13 +141,11 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 
 	private boolean isAttachmentTagHasChild() {
 		if (attachmentTag1.hasChildNodes() || attachmentTag2.hasChildNodes() || attachmentTag3.hasChildNodes()
-				|| attachmentTag4.hasChildNodes()
-					|| attachmentTag5.hasChildNodes()) {
+				|| attachmentTag4.hasChildNodes()) {
 			messageTag.appendChild(attachmentTag1);
 			messageTag.appendChild(attachmentTag2);
 			messageTag.appendChild(attachmentTag3);
 			messageTag.appendChild(attachmentTag4);
-			messageTag.appendChild(attachmentTag5);
 
 			return true;
 		}
@@ -244,7 +239,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	}
 
 	private void retrieveElementFromNFeContent(String content) {
-		Pattern pattern = Pattern.compile("(nfeProc|procCancNFe|cteProc|procEventoNFe|procEventoCTe)");
+		Pattern pattern = Pattern.compile("(nfeProc|cteProc|procEventoNFe|procEventoCTe)");
 
 		Matcher m = pattern.matcher(content);
 
@@ -266,17 +261,14 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 			case "nfeProc":
 				attachmentTag1.appendChild(textTag);
 				break;
-			case "procCancNFe":
+			case "cteProc":
 				attachmentTag2.appendChild(textTag);
 				break;
-			case "cteProc":
+			case "procEventoNFe":
 				attachmentTag3.appendChild(textTag);
 				break;
-			case "procEventoNFe":
-				attachmentTag4.appendChild(textTag);
-				break;
 			case "procEventoCTe":
-				attachmentTag5.appendChild(textTag);
+				attachmentTag4.appendChild(textTag);
 				break;
 			}
 		}
