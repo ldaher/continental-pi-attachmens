@@ -21,39 +21,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import br.com.resource.app.ContinentalMain.FileType;
+import br.com.resource.attachments.FileType;
 
 @SuppressWarnings("unused")
 public class ContinentalMain {
-
-	enum FileType {
-		PDF("PDF", new byte[][] { { 0x25, 0x50, 0x44, 0x46 } }), ZIP("ZIP", new byte[][] { { 0x50, 0x4b } }), XML("XML",
-				new byte[][] { {0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20} }), UNKNOWN("UNKNOWN", new byte[][] { {} });
-		
-		private byte[][] fileBytes;
-		private String fileType;
-
-		private FileType(String fileType, byte[][] fileBytes) {
-			this.fileBytes = fileBytes;
-			this.fileType = fileType;
-		}
-
-		public static String fileTypePerByte(byte[] fileAsByte) {
-			List<FileType> asList = Arrays.asList(FileType.values());
-
-			for (FileType f : asList) {
-				byte[] newByte = Arrays.copyOf(fileAsByte, f.fileBytes[0].length);
-
-				if (Arrays.equals(f.fileBytes[0], newByte)) {
-					return f.fileType;
-				}
-			}
-
-			return UNKNOWN.fileType;
-		}
-
-	}
-
 	public static void main(String[] args) throws IOException {
 		InputStream is = null;
 		try {
@@ -64,9 +35,9 @@ public class ContinentalMain {
 			byte[] bytes = a.getBytes();
 			Arrays.sort(bytes);
 			
-			String fileType = FileType.fileTypePerByte(readAllBytes);
+			FileType fileType = FileType.fileTypePerByte(readAllBytes);
 			
-			System.out.println(fileType);
+			System.out.println(fileType.getFileType());
 			
 			Byte b = new Byte(readAllBytes[0]);*/
 			
@@ -77,8 +48,9 @@ public class ContinentalMain {
 			//Checks whether this attachment`s array of bytes represents a ZIP file
 			// If this "zip" object contains a ZIP file, the "while" code block will be executed
 			while ((zipEntry = zip.getNextEntry()) != null) {
-				
 				String entryName = zipEntry.getName();
+				
+				System.out.printf( "%s: ", entryName);
 
 				if (entryName.matches("(?i:.*\\.xml)")) {
 					ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -91,15 +63,19 @@ public class ContinentalMain {
 						while ((bytesRead = zip.read(byteBuf)) != -1) {
 							out.write(byteBuf, 0, bytesRead);
 						}
+						
+						FileType fileTypePerByte = FileType.fileTypePerByte(out.toByteArray());
+						
+						System.out.println(fileTypePerByte.getFileType());
+						
 						String attachmentContent = new String(out.toByteArray(), "UTF-8");
-						System.out.println(attachmentContent);
+//						System.out.println(attachmentContent);
 						out.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 			}
-
 			
 		} catch (IOException e) {
 			e.printStackTrace();

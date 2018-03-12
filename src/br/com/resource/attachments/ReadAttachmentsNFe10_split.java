@@ -170,8 +170,14 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 			// Get attachment content
 			Attachment attachments = att.getAttachment(attachmentID);
 			getHelper().getTrace().addInfo("attachment content type: " + attachments.getContentType());
-
+			
 			try {
+				FileType zipFileType = FileType.fileTypePerByte(attachments.getContent());
+				
+				if(zipFileType.equals(FileType.ZIP)) {
+					continue;
+				}
+				
 				ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(attachments.getContent()));
 
 				ZipEntry zipEntry = null;
@@ -181,7 +187,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 				while ((zipEntry = zip.getNextEntry()) != null) {
 					
 					String entryName = zipEntry.getName();
-
+					
 					if (entryName.matches("(?i:.*\\.xml)")) {
 						ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -193,6 +199,13 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 							while ((bytesRead = zip.read(byteBuf)) != -1) {
 								out.write(byteBuf, 0, bytesRead);
 							}
+							
+							FileType xmlFileType = FileType.fileTypePerByte(out.toByteArray());
+							
+							if(!xmlFileType.equals(FileType.XML)) {
+								continue;
+							}
+							
 							attachmentContent = new String(out.toByteArray(), "UTF-8");
 							retrieveElementFromNFeContent(attachmentContent);
 
