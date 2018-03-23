@@ -36,6 +36,9 @@ import com.sap.aii.mapping.api.StreamTransformationException;
 import com.sap.aii.mapping.api.TransformationInput;
 import com.sap.aii.mapping.api.TransformationOutput;
 
+import br.com.resource.attachments.xml.executor.NfeVersionExecutor;
+import br.com.resource.attachments.xml.executor.parsers.v3.NfeParser;
+
 public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	private final String TAG_XI_MESSAGE = "ns0:Messages";
 	private final String TAG_Message1 = "ns0:Message1";
@@ -194,7 +197,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 								out.write(byteBuf, 0, bytesRead);
 							}
 							attachmentContent = new String(out.toByteArray(), "UTF-8");
-							retrieveElementFromNFeContent(attachmentContent);
+							retrieveElementFromNFeContentV2(attachmentContent);
 
 							out.close();
 						} catch (IOException e) {
@@ -206,7 +209,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 				if(attachmentContent == null) {
 					attachmentContent = new String(attachments.getContent(), "UTF-8");
 					
-					retrieveElementFromNFeContent(attachmentContent);
+					retrieveElementFromNFeContentV2(attachmentContent);
 				}
 			} catch (IOException e) {
 				getHelper().getTrace().addWarning("failed to read zip content file");
@@ -232,7 +235,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 
 			xmlContent = retrieveTagValue("<Content>", "</Content>", inStr);
 
-			retrieveElementFromNFeContent(xmlContent);
+			retrieveElementFromNFeContentV2(xmlContent);
 		} catch (Exception e) {
 			throw new SecurityException("XML de origem mal formado: " + e);
 		}
@@ -272,6 +275,45 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 				break;
 			}
 		}
+	}
+
+	private void retrieveElementFromNFeContentV2(String content) {
+		Matcher m = Pattern.compile("(nfeProc|cteProc)(\\s+?)(versao\\=\\\")(\\d{1,})(\\.?\\d{1,})(\\\")")
+				.matcher(content);
+	
+		String nt = "";
+		String nv = "";
+	
+		if (m.find()) {
+			nt = m.group(1);
+			nv = m.group(4);
+	
+			getHelper().getTrace().addInfo(nt + " added");
+	
+			NfeVersionExecutor nfeVersionExecutor = new NfeVersionExecutor(nv, nt, content);
+			
+			NfeParser loadNfeParser = nfeVersionExecutor.loadNfeParser();
+			String parsedNfeContent = loadNfeParser.parse();
+			
+			Node textTag = this.xmlDoc.createTextNode(parsedNfeContent);
+			textTag.normalize();
+	
+			switch (nt) {
+			case "nfeProc":
+				attachmentTag1.appendChild(textTag);
+				break;
+			case "procEventoNFe":
+				attachmentTag2.appendChild(textTag);
+				break;
+			case "cteProc":
+				attachmentTag3.appendChild(textTag);
+				break;
+			case "procEventoCTe":
+				attachmentTag4.appendChild(textTag);
+				break;
+			}
+	
+		} 
 	}
 
 	private static String retrieveTagValue(String AbreTag, String FechaTag, String xml) {
