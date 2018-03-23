@@ -278,15 +278,16 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	}
 
 	private void retrieveElementFromNFeContentV2(String content) {
-		Matcher m = Pattern.compile("(nfeProc|cteProc)(\\s+?)(versao\\=\\\")(\\d{1,})(\\.?\\d{1,})(\\\")")
-				.matcher(content);
-	
+		String regex = "(nfeProc|cteProc)(\\s+?)((xmlns=('|\")\\S+('|\")\\s+?)?)(versao=('|\"))(\\d{1,})(\\.?\\d{1,})('|\")";
+
+		Matcher m = Pattern.compile(regex).matcher(content);
+		
 		String nt = "";
 		String nv = "";
 	
 		if (m.find()) {
 			nt = m.group(1);
-			nv = m.group(4);
+			nv = m.group(9);
 	
 			getHelper().getTrace().addInfo(nt + " added");
 	
@@ -318,6 +319,9 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 
 	private static String retrieveTagValue(String AbreTag, String FechaTag, String xml) {
 
+		StringBuilder xmlHeader = new StringBuilder();
+		xmlHeader.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+		
 		String result = "";
 		int s = xml.indexOf(AbreTag);
 		int e = xml.indexOf(FechaTag);
@@ -327,6 +331,9 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 		} else {
 			result = xml.substring(s + AbreTag.length(), e);
 		}
-		return result;
+		
+		xmlHeader.append(result);
+		
+		return xmlHeader.toString();
 	}
 }
