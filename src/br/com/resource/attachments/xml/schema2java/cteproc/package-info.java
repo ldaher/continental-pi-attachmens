@@ -5,5 +5,5 @@
 // Generated on: 2018.03.22 at 02:49:26 PM BRT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.portalfiscal.inf.br/cte", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.portalfiscal.inf.br/cte", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED, xmlns = @javax.xml.bind.annotation.XmlNs(namespaceURI = "http://www.portalfiscal.inf.br/cte", prefix = ""))
 package br.com.resource.attachments.xml.schema2java.cteproc;

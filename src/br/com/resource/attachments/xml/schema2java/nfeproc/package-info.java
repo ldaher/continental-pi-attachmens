@@ -5,5 +5,5 @@
 // Generated on: 2018.03.21 at 02:49:38 PM BRT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.portalfiscal.inf.br/nfe", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.portalfiscal.inf.br/nfe", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED, xmlns = @javax.xml.bind.annotation.XmlNs(namespaceURI = "http://www.portalfiscal.inf.br/nfe", prefix = ""))
 package br.com.resource.attachments.xml.schema2java.nfeproc;
