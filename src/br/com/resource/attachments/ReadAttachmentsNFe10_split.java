@@ -36,6 +36,9 @@ import com.sap.aii.mapping.api.StreamTransformationException;
 import com.sap.aii.mapping.api.TransformationInput;
 import com.sap.aii.mapping.api.TransformationOutput;
 
+import br.com.resource.attachments.xml.executor.NfeVersionExecutor;
+import br.com.resource.attachments.xml.executor.parsers.v3.NfeParser;
+
 public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 	private final String TAG_XI_MESSAGE = "ns0:Messages";
 	private final String TAG_Message1 = "ns0:Message1";
@@ -182,7 +185,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 					
 					String entryName = zipEntry.getName();
 
-					if (entryName.matches(".*\\.xml")) {
+					if (entryName.matches("(?i:.*\\.xml)")) {
 						ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 						byte[] byteBuf = new byte[4096];
@@ -194,7 +197,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 								out.write(byteBuf, 0, bytesRead);
 							}
 							attachmentContent = new String(out.toByteArray(), "UTF-8");
-							retrieveElementFromNFeContent(attachmentContent);
+							retrieveElementFromNFeContentV2(attachmentContent);
 
 							out.close();
 						} catch (IOException e) {
@@ -206,7 +209,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 				if(attachmentContent == null) {
 					attachmentContent = new String(attachments.getContent(), "UTF-8");
 					
-					retrieveElementFromNFeContent(attachmentContent);
+					retrieveElementFromNFeContentV2(attachmentContent);
 				}
 			} catch (IOException e) {
 				getHelper().getTrace().addWarning("failed to read zip content file");
@@ -232,7 +235,7 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 
 			xmlContent = retrieveTagValue("<Content>", "</Content>", inStr);
 
-			retrieveElementFromNFeContent(xmlContent);
+			retrieveElementFromNFeContentV2(xmlContent);
 		} catch (Exception e) {
 			throw new SecurityException("XML de origem mal formado: " + e);
 		}
@@ -274,8 +277,51 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 		}
 	}
 
+	private void retrieveElementFromNFeContentV2(String content) {
+		String regex = "(nfeProc|cteProc)(\\s+?)((xmlns=('|\")\\S+('|\")\\s+?)?)(versao=('|\"))(\\d{1,})(\\.?\\d{1,})('|\")";
+
+		Matcher m = Pattern.compile(regex).matcher(content);
+		
+		String nt = "";
+		String nv = "";
+	
+		if (m.find()) {
+			nt = m.group(1);
+			nv = m.group(9);
+	
+			getHelper().getTrace().addInfo(nt + " added");
+	
+			NfeVersionExecutor nfeVersionExecutor = new NfeVersionExecutor(nv, nt, content);
+			
+			NfeParser loadNfeParser = nfeVersionExecutor.loadNfeParser();
+			String parsedNfeContent = loadNfeParser.parse();
+			
+			Node textTag = this.xmlDoc.createTextNode(parsedNfeContent);
+			textTag.normalize();
+	
+			switch (nt) {
+			case "nfeProc":
+				attachmentTag1.appendChild(textTag);
+				break;
+			case "procEventoNFe":
+				attachmentTag2.appendChild(textTag);
+				break;
+			case "cteProc":
+				attachmentTag3.appendChild(textTag);
+				break;
+			case "procEventoCTe":
+				attachmentTag4.appendChild(textTag);
+				break;
+			}
+	
+		} 
+	}
+
 	private static String retrieveTagValue(String AbreTag, String FechaTag, String xml) {
 
+		StringBuilder xmlHeader = new StringBuilder();
+		xmlHeader.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+		
 		String result = "";
 		int s = xml.indexOf(AbreTag);
 		int e = xml.indexOf(FechaTag);
@@ -285,6 +331,9 @@ public class ReadAttachmentsNFe10_split extends AbstractTransformation {
 		} else {
 			result = xml.substring(s + AbreTag.length(), e);
 		}
-		return result;
+		
+		xmlHeader.append(result);
+		
+		return xmlHeader.toString();
 	}
 }
