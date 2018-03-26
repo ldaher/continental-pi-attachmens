@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import br.com.resource.attachments.ReadAttachmentsNFe10_split;
 
+@SuppressWarnings("unused")
 public class LerXmlApp {
 	public static void main(String[] args) {
 		byte[] byteBuf = new byte[4096];
