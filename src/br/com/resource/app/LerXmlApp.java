@@ -4,12 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import br.com.resource.attachments.ReadAttachmentsNFe10_split;
-import br.com.resource.attachments.xml.executor.NfeVersionExecutor;
-import br.com.resource.attachments.xml.executor.parsers.v3.NfeParser;
 
 public class LerXmlApp {
 	public static void main(String[] args) {
